@@ -1,25 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import React from 'react';
+import Navbar from './components/Navbar';
+import MintCard from './components/MintCard';
+import DummyCard from './components/DummyCard';
+
+const App = () => {
+    return (
+        <div>
+            <Navbar />
+            <MintCard />
+            <div className="grid grid-cols-1">
+                {[...Array(8)].map((_, i) => <DummyCard key={i} />)}
+            </div>
+        </div>
+    );
+};
 
 export default App;
