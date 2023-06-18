@@ -3,52 +3,46 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/utils/Counters.sol";
 
-contract HistoryCam is ERC721Enumerable, ERC721URIStorage {
+contract ApeCam is ERC721Enumerable, ERC721URIStorage {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIds;
-
     uint256 lastMintedBlock;
-
+    uint256 minPrice;
     mapping(uint256 => uint256) public prevPrice;
+    address apecoin;
 
-    constructor() ERC721("HistoryCam", "HCAM") {}
+    constructor(address _apecoin, uint256 _minPrice) ERC721("ApeCam", "ACAM") {
+        apecoin = _apecoin;
+        minPrice = _minPrice;
+    }
 
     function mint(address recipient, string memory _tokenURI) public returns (uint256) {
         require(lastMintedBlock < block.number);
-
-        _tokenIds.increment();
 
         uint256 newId = _tokenIds.current();
         _mint(recipient, newId);
         _setTokenURI(newId, _tokenURI);
         lastMintedBlock = block.number;
-        prevPrice[newId] = 1000000000000000;
+        prevPrice[newId] = minPrice;
+
+        _tokenIds.increment();
 
         return newId;
     }
 
-    function steal(uint256 tokenId) public payable {
+    function steal(uint256 tokenId, uint256 amount) public {
         address owner = ownerOf(tokenId);
         require(msg.sender != owner, "cannot steal from yourself");
-        require(msg.value > prevPrice[tokenId], "must pay more than previous person to steal");
+        require(amount > prevPrice[tokenId], "must pay more than previous person to steal");
+
+        prevPrice[tokenId] = amount;
 
         _transfer(owner, msg.sender, tokenId);
-        _transferFund(payable(owner), msg.value);
-
-        prevPrice[tokenId] = msg.value;
-    }
-
-    function _transferFund(address payable to, uint256 amount) internal {
-        if (amount == 0) {
-            return;
-        }
-        require(to != address(0));
-
-        (bool transferSent,) = to.call{value: amount}("");
-        require(transferSent, "Failed to send ETH");
+        IERC20(apecoin).transferFrom(msg.sender, owner, amount);
     }
 
     function getOwnedTokenIds(address wallet) external view returns (uint256[] memory) {
