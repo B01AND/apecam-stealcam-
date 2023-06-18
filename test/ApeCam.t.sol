@@ -17,8 +17,8 @@ contract ApeCamTest is StdCheats, Test {
 
     function setUp() public {
         apeCoin = new ERC20("ApeCoin", "APE");
-        deployer = new ApeCamDeployScript(address(apeCoin));
-        apeCam = deployer.run();
+        deployer = new ApeCamDeployScript();
+        apeCam = deployer.run(address(apeCoin));
 
         alice = makeAddr("alice");
         bob = makeAddr("bob");

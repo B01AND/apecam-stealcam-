@@ -6,14 +6,21 @@ import "forge-std/Script.sol";
 
 contract ApeCamDeployScript is Script {
     address public tokenAddress;
+    ApeCam apeCam;
 
-    constructor(address _tokenAddress) {
+    function run(address _tokenAddress) external returns (ApeCam) {
+        if (block.chainid == 5) {
+            uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+            tokenAddress = vm.envAddress("APE_ADDRESS");
+
+            vm.startBroadcast(deployerKey);
+            apeCam = new ApeCam(tokenAddress, 1e18);
+            vm.stopBroadcast();
+            return apeCam;
+        }
         tokenAddress = _tokenAddress;
-    }
-
-    function run() external returns (ApeCam) {
         vm.startBroadcast();
-        ApeCam apeCam = new ApeCam(tokenAddress, 1e18);
+        apeCam = new ApeCam(tokenAddress, 1e18);
         vm.stopBroadcast();
         return apeCam;
     }
