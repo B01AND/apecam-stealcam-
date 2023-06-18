@@ -1,5 +1,6 @@
 // src/components/Navbar.js
 
+import { ethers } from 'ethers';
 import React, { useState } from 'react';
 
 const Navbar = () => {
@@ -9,10 +10,12 @@ const Navbar = () => {
     const connectWallet = async () => {
         if (window.ethereum) {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                console.log(`Connected to account ${accounts[0]}`);
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                                
+                console.log(`Connected to account ${await signer.getAddress()}`);
+
                 setConnected(true);
-                setAccount(accounts[0]);
             } catch (error) {
                 console.error(`Failed to connect to wallet: ${error}`);
                 setConnected(false);
